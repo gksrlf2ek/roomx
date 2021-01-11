@@ -1,0 +1,20 @@
+body {
+    margin: 0px;
+}
+
+canvas {
+    /* to eliminate ghost margin */
+    vertical-align: bottom;
+}
+
+.title {
+    font: 25px sans-serif;
+}
+
+.buttons a {
+    color: black;
+}
+
+.buttons a:hover {
+    color: blue;
+}

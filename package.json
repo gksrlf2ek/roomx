@@ -1,0 +1,23 @@
+{
+    "name": "roomx",
+    "version": "1.0.0",
+    "description": "Room X - room of you, by you, for you",
+    "main": "index.js",
+    "scripts": {
+        "test": "sudo node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gksrlf2ek/roomx.git"
+    },
+    "author": "gksrlf2ek",
+    "license": "UNLICENSED",
+    "bugs": {
+        "url": "https://github.com/gksrlf2ek/roomx/issues"
+    },
+    "homepage": "https://github.com/gksrlf2ek/roomx#readme",
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "express": "^4.17.1"
+    }
+}
