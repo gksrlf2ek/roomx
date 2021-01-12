@@ -14,68 +14,52 @@ addEventListener("mouseup", (e) => {
     mouse.down = false;
 });
 
+// components
+function Label(text, font, x, y, color) {
+    ctx.font = font;
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+}
+function Button(text, font, x, y, w, h, textColor, textHighlight, boxColor, boxHighlight) {
+    var hover = mouse.x > x && mouse.x < x + w && mouse.y > y && mouse.y < y + h;
+    if (hover) {
+        var boxColor = boxHighlight;
+        var textColor = textHighlight;
+    }
+    ctx.font = font;
+    ctx.fillStyle = boxColor;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = textColor;
+    ctx.fillText(text, x + w / 2, y + h / 2);
+
+    return hover && mouse.down;
+}
+
 // variables for game
 stage = "title";
 
 // setting for ctx
 ctx.textAlign = "center";
+ctx.textBaseline = "middle";
 
 // game loop
-function draw() {
+function update() {
     // clear whole canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (stage === "title") {
-        // fill whole canvas with black
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // draw title at center
-        ctx.font = "50px serif";
-        ctx.fillStyle = "white";
-        ctx.fillText("Room:X", 450, 100);
-
-        // draw start button
-        if (
-            mouse.x - 300 > 0 &&
-            mouse.x - 600 < 0 &&
-            mouse.y - 200 > 0 &&
-            mouse.y - 250 < 0
-        ) {
-            var backgroundColor = "#222222";
-            var textColor = "white";
-        } else {
-            var backgroundColor = "white";
-            var textColor = "black";
+        Label("Room:X", "50px serif", 450, 100, "white");
+        if (Button("Start", "25px serif", 300, 200, 300, 50, "black", "white", "white", "#222222")) {
+            stage = "game";
         }
-        ctx.fillStyle = backgroundColor;
-        ctx.fillRect(300, 200, 300, 50);
-        ctx.fillStyle = textColor;
-        ctx.font = "25px serif";
-        ctx.fillText("Start", 450, 235);
     } else if (stage === "game") {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "white";
-        ctx.font = "50px serif";
-        ctx.fillText("Game stage", 450, 100);
+
+        Label("Game stage", "50px serif", 450, 100, "white");
     }
 }
-
-function update() {
-    if (
-        mouse.x - 300 > 0 &&
-        mouse.x - 600 < 0 &&
-        mouse.y - 200 > 0 &&
-        mouse.y - 250 < 0 &&
-        mouse.down
-    ) {
-        stage = "game";
-    }
-}
-
-var gameloop = () => {
-    update();
-    draw();
-};
-var interval = setInterval(gameloop, 15);
+var interval = setInterval(update, 15);
