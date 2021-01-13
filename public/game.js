@@ -2,13 +2,14 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
 // mouse position
-var mouse = { x: 0, y: 0, down: false };
+var mouse = { x: 0, y: 0, down: false, pressed: false };
 addEventListener("mousemove", (e) => {
     mouse.x = e.pageX;
     mouse.y = e.pageY;
 });
 addEventListener("mousedown", (e) => {
     mouse.down = true;
+    mouse.pressed = true;
 });
 addEventListener("mouseup", (e) => {
     mouse.down = false;
@@ -63,7 +64,7 @@ function Sprite(img, x, y, degree, scalex, scaley) {
 }
 function Room(x, y, size, color, left, right, bottom) {
     ctx.strokeStyle = color || "white";
-    var k = (Math.tan(Math.PI / 3) * size) / 2;
+    var k = size;
     // color
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -117,14 +118,18 @@ function IsoTile(x, y, sizex, sizey, color) {
 
 // configurations
 var stage = "title";
+var boxes = [];
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
 // images
-var total = 1;
+var total = 2;
 var player = new Image();
 player.src = "./img/player.png";
 player.onload = () => total--;
+var box = new Image();
+box.src = "./img/box.png";
+box.onload = () => total--;
 
 // stages
 function titleStage() {
@@ -141,8 +146,19 @@ function gameStage() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    Room(450, 250, 100, "white", "#888888", "#bbbbbb", "#eeeeee");
-    IsoTile(pos2iso(mouse, 86.6, 50).x, pos2iso(mouse, 86.6, 50).y, 86.6, 50, "white");
+    Room(450, 250, 96, "white", "#888888", "#bbbbbb", "#eeeeee");
+
+    if (mouse.pressed) {
+        boxes.push(iso2pos(pos2iso({ x: mouse.x, y: mouse.y }, 64, 32), 64, 32));
+        boxes.sort((a, b) => a.y - b.y);
+    }
+
+    for (let i = 0; i < boxes.length; i++) {
+        Sprite(box, boxes[i].x, boxes[i].y);
+    }
+
+    var pos = { x: mouse.x, y: mouse.y };
+    IsoTile(pos2iso(pos, 64, 32).x, pos2iso(pos, 64, 32).y, 64, 32, "red");
 }
 
 // main loop
@@ -158,11 +174,13 @@ function update() {
             gameStage();
             break;
     }
+
+    mouse.pressed = false;
 }
 
 var loadChecker = setInterval(() => {
     if (total === 0) {
-        setInterval(update, 100);
+        setInterval(update, 160);
         clearInterval(loadChecker);
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
