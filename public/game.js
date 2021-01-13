@@ -45,10 +45,52 @@ function Sprite(img, x, y, degree) {
     }
     ctx.translate(-x, -y);
 }
+function Room(x, y, size, color, left, right, bottom) {
+    ctx.strokeStyle = color || "white";
+    var k = (Math.tan(Math.PI / 3) * size) / 2;
+    // color
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - size);
+    ctx.lineTo(x - k, y - size / 2);
+    ctx.lineTo(x - k, y + size / 2);
+    ctx.lineTo(x, y);
+    ctx.fillStyle = left || "black";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - size);
+    ctx.lineTo(x + k, y - size / 2);
+    ctx.lineTo(x + k, y + size / 2);
+    ctx.lineTo(x, y);
+    ctx.fillStyle = right || left || "black";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + k, y + size / 2);
+    ctx.lineTo(x, y + size);
+    ctx.lineTo(x - k, y + size / 2);
+    ctx.lineTo(x, y);
+    ctx.fillStyle = bottom || right || left || "black";
+    ctx.fill();
+    // line
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y - size);
+    ctx.lineTo(x - k, y - size / 2);
+    ctx.lineTo(x - k, y + size / 2);
+    ctx.lineTo(x, y + size);
+    ctx.lineTo(x + k, y + size / 2);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x - k, y + size / 2);
+    ctx.moveTo(x, y - size);
+    ctx.lineTo(x + k, y - size / 2);
+    ctx.lineTo(x + k, y + size / 2);
+    ctx.stroke();
+}
 
 // configurations
 var stage = "title";
-var rotate = 0; // to rotate player image for test purpose
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
@@ -56,10 +98,7 @@ ctx.textBaseline = "middle";
 var total = 1;
 var player = new Image();
 player.src = "./img/player.png";
-player.onload = () => {
-    console.log("load");
-    total -= 1;
-};
+player.onload = () => total--;
 
 // stages
 function titleStage() {
@@ -76,14 +115,7 @@ function gameStage() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    Label("Game stage", "50px serif", 450, 100, "white");
-    if (Button("<", "25px serif", 10, 10, 50, 50, "black", "white", "white", "#222222")) {
-        stage = "title";
-    }
-
-    // player image will rotate for test purpose
-    Sprite(player, 450, 250, rotate);
-    rotate += 3;
+    Room(450, 250, 100, "white", "#888888", "#bbbbbb", "#eeeeee");
 }
 
 // main loop
