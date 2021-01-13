@@ -118,18 +118,22 @@ function IsoTile(x, y, sizex, sizey, color) {
 
 // configurations
 var stage = "title";
-var boxes = [];
+var item = null;
+var furniture = [];
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
 // images
-var total = 2;
+var total = 3;
 var player = new Image();
 player.src = "./img/player.png";
 player.onload = () => total--;
 var box = new Image();
 box.src = "./img/box.png";
 box.onload = () => total--;
+var chair = new Image();
+chair.src = "./img/chair.png";
+chair.onload = () => total--;
 
 // stages
 function titleStage() {
@@ -139,6 +143,7 @@ function titleStage() {
     Label("Room:X", "50px serif", 450, 100, "white");
     if (Button("Start", "25px serif", 300, 200, 300, 50, "black", "white", "white", "#222222")) {
         stage = "game";
+        item = box;
     }
 }
 
@@ -148,17 +153,37 @@ function gameStage() {
 
     Room(450, 250, 96, "white", "#888888", "#bbbbbb", "#eeeeee");
 
-    if (mouse.pressed) {
-        boxes.push(iso2pos(pos2iso({ x: mouse.x, y: mouse.y }, 64, 32), 64, 32));
-        boxes.sort((a, b) => a.y - b.y);
+    // button for chainging item to place
+    if (Button("box", "25px serif", 100, 450, 150, 50, "white", "black", "#222222", "white")) {
+        item = box;
+    }
+    if (Button("chair", "25px serif", 300, 450, 150, 50, "white", "black", "#222222", "white")) {
+        item = chair;
     }
 
-    for (let i = 0; i < boxes.length; i++) {
-        Sprite(box, boxes[i].x, boxes[i].y);
+    // if mouse is clicked and inside of view (not in buttons' area), add item in furniture and sort
+    if (mouse.pressed && mouse.y < 450) {
+        var pos = iso2pos(pos2iso({ x: mouse.x, y: mouse.y }, 64, 32), 64, 32);
+        pos.img = item;
+        furniture.push(pos);
+        furniture.sort((a, b) => a.y - b.y);
     }
 
-    var pos = { x: mouse.x, y: mouse.y };
-    IsoTile(pos2iso(pos, 64, 32).x, pos2iso(pos, 64, 32).y, 64, 32, "red");
+    // draw every furnitures
+    for (let i = 0; i < furniture.length; i++) {
+        Sprite(furniture[i].img, furniture[i].x, furniture[i].y);
+    }
+
+    // draw furniture position guide only if mouse is not in buttons' area
+    if (mouse.y < 450) {
+        var pos = { x: mouse.x, y: mouse.y };
+        IsoTile(pos2iso(pos, 64, 32).x, pos2iso(pos, 64, 32).y, 64, 32, "red");
+    }
+
+    // draw item indicator
+    ctx.fillStyle = "#888888";
+    ctx.fillRect(10, 10, 80, 80);
+    Sprite(item, 50, 50);
 }
 
 // main loop
