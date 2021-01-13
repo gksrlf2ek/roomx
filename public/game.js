@@ -14,6 +14,20 @@ addEventListener("mouseup", (e) => {
     mouse.down = false;
 });
 
+// helper function
+function pos2iso(position, sizex, sizey) {
+    var modpos = { x: position.x - canvas.width / 2, y: position.y - canvas.height / 2 };
+    var v = Math.floor(modpos.y / sizey + modpos.x / sizex);
+    var w = Math.floor(modpos.y / sizey - modpos.x / sizex);
+    return { x: v, y: w };
+}
+
+function iso2pos(iso, sizex, sizey) {
+    var x = (sizex / 2) * (iso.x - iso.y);
+    var y = (sizey / 2) * (iso.x + iso.y);
+    return { x: x + canvas.width / 2, y: y + canvas.height / 2 };
+}
+
 // components
 function Label(text, font, x, y, color) {
     ctx.font = font;
@@ -34,12 +48,14 @@ function Button(text, font, x, y, w, h, textColor, textHighlight, boxColor, boxH
 
     return hover && mouse.down;
 }
-function Sprite(img, x, y, degree) {
+function Sprite(img, x, y, degree, scalex, scaley) {
     ctx.translate(x, y);
     if (degree) {
         ctx.rotate(degree * (Math.PI / 180));
     }
+    ctx.scale(scalex || 1, scaley || 1);
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    ctx.scale(1, 1);
     if (degree) {
         ctx.rotate(-degree * (Math.PI / 180));
     }
@@ -88,6 +104,16 @@ function Room(x, y, size, color, left, right, bottom) {
     ctx.lineTo(x + k, y + size / 2);
     ctx.stroke();
 }
+function IsoTile(x, y, sizex, sizey, color) {
+    ctx.fillStyle = color || "white";
+    ctx.beginPath();
+    ctx.moveTo(iso2pos({ x: x, y: y }, sizex, sizey).x, iso2pos({ x: x, y: y }, sizex, sizey).y);
+    ctx.lineTo(iso2pos({ x: x, y: y + 1 }, sizex, sizey).x, iso2pos({ x: x, y: y + 1 }, sizex, sizey).y);
+    ctx.lineTo(iso2pos({ x: x + 1, y: y + 1 }, sizex, sizey).x, iso2pos({ x: x + 1, y: y + 1 }, sizex, sizey).y);
+    ctx.lineTo(iso2pos({ x: x + 1, y: y }, sizex, sizey).x, iso2pos({ x: x + 1, y: y }, sizex, sizey).y);
+    ctx.lineTo(iso2pos({ x: x, y: y }, sizex, sizey).x, iso2pos({ x: x, y: y }, sizex, sizey).y);
+    ctx.fill();
+}
 
 // configurations
 var stage = "title";
@@ -116,6 +142,7 @@ function gameStage() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     Room(450, 250, 100, "white", "#888888", "#bbbbbb", "#eeeeee");
+    IsoTile(pos2iso(mouse, 86.6, 50).x, pos2iso(mouse, 86.6, 50).y, 86.6, 50, "white");
 }
 
 // main loop
@@ -135,8 +162,7 @@ function update() {
 
 var loadChecker = setInterval(() => {
     if (total === 0) {
-        console.log("loaded");
-        setInterval(update, 15);
+        setInterval(update, 100);
         clearInterval(loadChecker);
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
