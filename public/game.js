@@ -35,7 +35,7 @@ function Label(text, font, x, y, color) {
     ctx.fillStyle = color;
     ctx.fillText(text, x, y);
 }
-function Button(text, font, x, y, w, h, textColor, textHighlight, boxColor, boxHighlight) {
+function Button(text, font, x, y, w, h, textColor, textHighlight, boxColor, boxHighlight, option) {
     var hover = mouse.x > x && mouse.x < x + w && mouse.y > y && mouse.y < y + h;
     if (hover) {
         var boxColor = boxHighlight;
@@ -47,7 +47,7 @@ function Button(text, font, x, y, w, h, textColor, textHighlight, boxColor, boxH
     ctx.fillStyle = textColor;
     ctx.fillText(text, x + w / 2, y + h / 2);
 
-    return hover && mouse.pressed;
+    return hover && (option ? mouse[option] : mouse.pressed);
 }
 function Sprite(img, x, y, degree, scalex, scaley) {
     ctx.translate(x, y);
@@ -121,6 +121,9 @@ var stage = "title";
 var item = null;
 var furniture = [];
 var coins = 30;
+var x = canvas.width / 2;
+var y = canvas.height / 2;
+var rot = 0;
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
@@ -145,12 +148,12 @@ function titleStage() {
 
     Label("Room:X", "50px serif", 450, 100, "white");
     if (Button("Start", "25px serif", 300, 200, 300, 50, "black", "white", "white", "#222222")) {
-        stage = "game";
+        stage = "room";
         item = box;
     }
 }
 
-function gameStage() {
+function roomStage() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -164,9 +167,14 @@ function gameStage() {
         item = chair;
     }
 
+    // button for gaming
+    if (Button("dodge", "20px serif", 400, 25, 100, 50, "black", "white", "white", "#222222")) {
+        stage = "dodge";
+    }
+
     // if mouse is clicked and inside of view (not in buttons' area), add item in furniture and sort
     var pos = iso2pos(pos2iso({ x: mouse.x, y: mouse.y }, 64, 32), 64, 32);
-    if (mouse.pressed && mouse.y < 450 && coins > item.price && !furniture.find((v) => v.x === pos.x && v.y === pos.y)) {
+    if (mouse.pressed && mouse.y < 450 && mouse.y > 100 && coins > item.price && !furniture.find((v) => v.x === pos.x && v.y === pos.y)) {
         pos.img = item;
         coins -= item.price;
         furniture.push(pos);
@@ -179,7 +187,7 @@ function gameStage() {
     }
 
     // draw furniture position guide only if mouse is not in buttons' area
-    if (mouse.y < 450) {
+    if (mouse.y < 450 && mouse.y > 100) {
         var pos = { x: mouse.x, y: mouse.y };
         IsoTile(pos2iso(pos, 64, 32).x, pos2iso(pos, 64, 32).y, 64, 32, "red");
     }
@@ -190,8 +198,28 @@ function gameStage() {
     Sprite(item, 50, 50);
 
     ctx.fillStyle = "white";
+    ctx.font = "15px serif";
+    ctx.fillText(item.price, 20, 20);
+
+    ctx.fillStyle = "white";
     ctx.font = "25px serif";
     ctx.fillText(coins, 850, 50);
+}
+
+function dodgeStage() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // draw player
+    Sprite(player, x, y, rot);
+
+    // draw interface
+    if (Button("<", "25px serif", 25, 425, 50, 50, "white", "black", "#222222", "white", "down")) {
+        rot -= 4;
+    }
+    if (Button(">", "25px serif", 825, 425, 50, 50, "white", "black", "#222222", "white", "down")) {
+        rot += 4;
+    }
 }
 
 // main loop
@@ -203,8 +231,11 @@ function update() {
         case "title":
             titleStage();
             break;
-        case "game":
-            gameStage();
+        case "room":
+            roomStage();
+            break;
+        case "dodge":
+            dodgeStage();
             break;
     }
 
@@ -213,7 +244,7 @@ function update() {
 
 var loadChecker = setInterval(() => {
     if (total === 0) {
-        setInterval(update, 160);
+        setInterval(update, 15);
         clearInterval(loadChecker);
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
