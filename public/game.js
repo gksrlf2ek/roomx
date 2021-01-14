@@ -47,7 +47,7 @@ function Button(text, font, x, y, w, h, textColor, textHighlight, boxColor, boxH
     ctx.fillStyle = textColor;
     ctx.fillText(text, x + w / 2, y + h / 2);
 
-    return hover && mouse.down;
+    return hover && mouse.pressed;
 }
 function Sprite(img, x, y, degree, scalex, scaley) {
     ctx.translate(x, y);
@@ -120,6 +120,7 @@ function IsoTile(x, y, sizex, sizey, color) {
 var stage = "title";
 var item = null;
 var furniture = [];
+var coins = 30;
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
@@ -131,9 +132,11 @@ player.onload = () => total--;
 var box = new Image();
 box.src = "./img/box.png";
 box.onload = () => total--;
+box.price = 3;
 var chair = new Image();
 chair.src = "./img/chair.png";
 chair.onload = () => total--;
+chair.price = 10;
 
 // stages
 function titleStage() {
@@ -162,9 +165,10 @@ function gameStage() {
     }
 
     // if mouse is clicked and inside of view (not in buttons' area), add item in furniture and sort
-    if (mouse.pressed && mouse.y < 450) {
-        var pos = iso2pos(pos2iso({ x: mouse.x, y: mouse.y }, 64, 32), 64, 32);
+    var pos = iso2pos(pos2iso({ x: mouse.x, y: mouse.y }, 64, 32), 64, 32);
+    if (mouse.pressed && mouse.y < 450 && coins > item.price && !furniture.find((v) => v.x === pos.x && v.y === pos.y)) {
         pos.img = item;
+        coins -= item.price;
         furniture.push(pos);
         furniture.sort((a, b) => a.y - b.y);
     }
@@ -180,10 +184,14 @@ function gameStage() {
         IsoTile(pos2iso(pos, 64, 32).x, pos2iso(pos, 64, 32).y, 64, 32, "red");
     }
 
-    // draw item indicator
+    // draw UI
     ctx.fillStyle = "#888888";
     ctx.fillRect(10, 10, 80, 80);
     Sprite(item, 50, 50);
+
+    ctx.fillStyle = "white";
+    ctx.font = "25px serif";
+    ctx.fillText(coins, 850, 50);
 }
 
 // main loop
