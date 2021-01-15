@@ -118,12 +118,16 @@ function IsoTile(x, y, sizex, sizey, color) {
 
 // configurations
 var stage = "title";
+
 var item = null;
 var furniture = [];
 var coins = 30;
+
 var x = canvas.width / 2;
 var y = canvas.height / 2;
 var rot = 0;
+var dodgeballs = [];
+
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
@@ -214,11 +218,56 @@ function dodgeStage() {
     Sprite(player, x, y, rot);
 
     // draw interface
-    if (Button("<", "25px serif", 25, 425, 50, 50, "white", "black", "#222222", "white", "down")) {
+    if (Button("<", "25px serif", 775, 425, 50, 50, "white", "black", "#222222", "white", "down")) {
         rot -= 4;
     }
     if (Button(">", "25px serif", 825, 425, 50, 50, "white", "black", "#222222", "white", "down")) {
         rot += 4;
+    }
+
+    // draw dodge balls
+    for (let i = 0; i < dodgeballs.length; i++) {
+        ctx.fillStyle = dodgeballs[i].color;
+        ctx.fillRect(dodgeballs[i].x - 2, dodgeballs[i].y - 2, 4, 4);
+    }
+
+    // create dodge ball
+    if (Math.random() < 0.1) {
+        var ball = {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            color: ["red", "yellow", "green"][Math.floor(Math.random() * 3)],
+            dir: { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 },
+        };
+        var rnd = Math.random();
+        if (rnd < 0.25) {
+            ball.x = 0;
+        } else if (rnd < 0.5) {
+            ball.x = canvas.width;
+        } else if (rnd < 0.75) {
+            ball.y = 0;
+        } else {
+            ball.y = canvas.height;
+        }
+        dodgeballs.push(ball);
+    }
+
+    // move dodge ball
+    for (let i = dodgeballs.length - 1; i >= 0; i--) {
+        dodgeballs[i].x += dodgeballs[i].dir.x;
+        dodgeballs[i].y += dodgeballs[i].dir.y;
+        if (dodgeballs[i].x < 0 || dodgeballs[i].y < 0 || dodgeballs[i].x > canvas.width || dodgeballs[i].y > canvas.height) {
+            dodgeballs.splice(i, 1);
+        }
+    }
+
+    // check if ball hits player
+    for (let i = 0; i < dodgeballs.length; i++) {
+        if (Math.abs(x - dodgeballs[i].x) < (player.width + 4) / 2 && Math.abs(y - dodgeballs[i].y) < (player.height + 4) / 2) {
+            ctx.fillStyle = "white";
+            ctx.font = "25px serif";
+            ctx.fillText("hit", canvas.width / 2, 100);
+        }
     }
 }
 
