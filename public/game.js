@@ -125,7 +125,7 @@ var coins = 30;
 
 var x = canvas.width / 2;
 var y = canvas.height / 2;
-var speed = 4;
+var speed = 150;
 var dodgeballs = [];
 
 var score = 0;
@@ -227,12 +227,11 @@ function dodgeStage() {
     }
 
     // create dodge ball
-    if (Math.random() < 5 / fps) {
+    if (Math.random() < 10 / fps) {
         var ball = {
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
             color: ["red", "yellow", "green"][Math.floor(Math.random() * 3)],
-            dir: { x: Math.random() * 6 - 3, y: Math.random() * 6 - 3 },
         };
         var rnd = Math.random();
         if (rnd < 0.25) {
@@ -244,13 +243,15 @@ function dodgeStage() {
         } else {
             ball.y = canvas.height;
         }
+        var rad = Math.atan2(y - ball.y, x - ball.x);
+        ball.dir = { x: Math.cos(rad) * 100, y: Math.sin(rad) * 100 };
         dodgeballs.push(ball);
     }
 
     // move dodge ball
     for (let i = dodgeballs.length - 1; i >= 0; i--) {
-        dodgeballs[i].x += dodgeballs[i].dir.x;
-        dodgeballs[i].y += dodgeballs[i].dir.y;
+        dodgeballs[i].x += dodgeballs[i].dir.x / fps;
+        dodgeballs[i].y += dodgeballs[i].dir.y / fps;
         if (dodgeballs[i].x < 0 || dodgeballs[i].y < 0 || dodgeballs[i].x > canvas.width || dodgeballs[i].y > canvas.height) {
             dodgeballs.splice(i, 1);
         }
@@ -269,8 +270,8 @@ function dodgeStage() {
     // player control
     if (mouse.down) {
         var rad = Math.atan2(mouse.y - y, mouse.x - x);
-        x += speed * Math.cos(rad);
-        y += speed * Math.sin(rad);
+        x += (speed * Math.cos(rad)) / fps;
+        y += (speed * Math.sin(rad)) / fps;
     }
 
     // calculate and draw score
