@@ -269,9 +269,18 @@ function dodgeStage() {
 
     // player control
     if (mouse.down) {
-        var rad = Math.atan2(mouse.y - y, mouse.x - x);
-        x += (speed * Math.cos(rad)) / fps;
-        y += (speed * Math.sin(rad)) / fps;
+        var posx = mouse.x - x;
+        var posy = mouse.y - y;
+        var rad = Math.atan2(posy, posx);
+        var dx = (speed * Math.cos(rad)) / fps;
+        var dy = (speed * Math.sin(rad)) / fps;
+        if (posx * posx + posy * posy > dx * dx + dy * dy) {
+            x += dx;
+            y += dy;
+        } else {
+            x += posx;
+            y += posy;
+        }
     }
 
     // calculate and draw score
