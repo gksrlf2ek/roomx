@@ -125,6 +125,7 @@ var coins = 30;
 
 var x = canvas.width / 2;
 var y = canvas.height / 2;
+var speed = 4;
 var rot = 0;
 var dodgeballs = [];
 
@@ -217,14 +218,6 @@ function dodgeStage() {
     // draw player
     Sprite(player, x, y, rot);
 
-    // draw interface
-    if (Button("<", "25px serif", 775, 425, 50, 50, "white", "black", "#222222", "white", "down")) {
-        rot -= 4;
-    }
-    if (Button(">", "25px serif", 825, 425, 50, 50, "white", "black", "#222222", "white", "down")) {
-        rot += 4;
-    }
-
     // draw dodge balls
     for (let i = 0; i < dodgeballs.length; i++) {
         ctx.fillStyle = dodgeballs[i].color;
@@ -268,6 +261,13 @@ function dodgeStage() {
             ctx.font = "25px serif";
             ctx.fillText("hit", canvas.width / 2, 100);
         }
+    }
+
+    // player control
+    if (mouse.down) {
+        var rad = Math.atan2(mouse.y - y, mouse.x - x);
+        x += speed * Math.cos(rad);
+        y += speed * Math.sin(rad);
     }
 }
 
