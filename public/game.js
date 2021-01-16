@@ -126,9 +126,11 @@ var coins = 30;
 var x = canvas.width / 2;
 var y = canvas.height / 2;
 var speed = 4;
-var rot = 0;
 var dodgeballs = [];
 
+var score = 0;
+
+const fps = 30;
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
@@ -216,7 +218,7 @@ function dodgeStage() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // draw player
-    Sprite(player, x, y, rot);
+    Sprite(player, x, y);
 
     // draw dodge balls
     for (let i = 0; i < dodgeballs.length; i++) {
@@ -225,12 +227,12 @@ function dodgeStage() {
     }
 
     // create dodge ball
-    if (Math.random() < 0.1) {
+    if (Math.random() < 5 / fps) {
         var ball = {
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
             color: ["red", "yellow", "green"][Math.floor(Math.random() * 3)],
-            dir: { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 },
+            dir: { x: Math.random() * 6 - 3, y: Math.random() * 6 - 3 },
         };
         var rnd = Math.random();
         if (rnd < 0.25) {
@@ -254,12 +256,13 @@ function dodgeStage() {
         }
     }
 
-    // check if ball hits player
+    // if ball hits player, reset dodgeball game data and show score
     for (let i = 0; i < dodgeballs.length; i++) {
         if (Math.abs(x - dodgeballs[i].x) < (player.width + 4) / 2 && Math.abs(y - dodgeballs[i].y) < (player.height + 4) / 2) {
-            ctx.fillStyle = "white";
-            ctx.font = "25px serif";
-            ctx.fillText("hit", canvas.width / 2, 100);
+            x = canvas.width / 2;
+            y = canvas.height / 2;
+            dodgeballs = [];
+            stage = "score";
         }
     }
 
@@ -268,6 +271,24 @@ function dodgeStage() {
         var rad = Math.atan2(mouse.y - y, mouse.x - x);
         x += speed * Math.cos(rad);
         y += speed * Math.sin(rad);
+    }
+
+    // calculate and draw score
+    Label(score.toFixed(0), "20px serif", canvas.width / 2, 20, "green");
+    score += 10 / fps;
+}
+
+function scoreStage() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    Label(score.toFixed(0), "30px serif", canvas.width / 2, canvas.height / 2 - 100, "white");
+    if (Button("Back", "20px serif", canvas.width / 2 - 50, canvas.height / 2, 100, 50, "white", "black", "#222222", "white")) {
+        if (score > 100) {
+            coins += Math.floor((score - 100) / 25);
+        }
+        score = 0;
+        stage = "room";
     }
 }
 
@@ -286,6 +307,9 @@ function update() {
         case "dodge":
             dodgeStage();
             break;
+        case "score":
+            scoreStage();
+            break;
     }
 
     mouse.pressed = false;
@@ -293,7 +317,7 @@ function update() {
 
 var loadChecker = setInterval(() => {
     if (total === 0) {
-        setInterval(update, 15);
+        setInterval(update, 1000 / fps);
         clearInterval(loadChecker);
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
